@@ -1,0 +1,79 @@
+﻿@model _25DH190113_LTW.Models.ViewModel.ProductDetailsVM
+@using PagedList.Mvc
+@{
+    ViewBag.Title = Model.product.ProductName;
+}
+
+<div class="container my-4">
+    <div class="row g-4 bg-white p-4 shadow-sm rounded">
+        <!-- Khối bên trái: Ảnh nhạc cụ + Nghe thử -->
+        <div class="col-md-4 text-center border-end">
+            <img src="@Model.product.ProductImage" alt="@Model.product.ProductName" class="img-fluid rounded mb-3" style="max-height: 320px;" />
+            @if (!string.IsNullOrEmpty(Model.product.AudioDemoUrl))
+            {
+                <div class="mt-2">
+                    <p class="fw-bold mb-1">🎵 Nghe thử âm thanh nhạc cụ:</p>
+                    <audio controls class="w-100" src="@Model.product.AudioDemoUrl"></audio>
+                </div>
+            }
+        </div>
+
+        <!-- Khối ở giữa: Thông tin chi tiết nhạc cụ -->
+        <div class="col-md-5 border-end">
+            <span class="badge bg-warning text-dark mb-2">@(Model.product.Category != null ? Model.product.Category.CategoryName : "")</span>
+            <h3 class="fw-bold">@Model.product.ProductName</h3>
+            <p class="text-muted">Đã bán: @(Model.product.OrderDetails != null ? Model.product.OrderDetails.Count : 0) sản phẩm</p>
+            <h3 class="text-danger fw-bold my-3">@Model.product.ProductPrice.ToString("N0") VNĐ</h3>
+            <hr />
+            <h5 class="fw-bold">Mô tả nhạc cụ:</h5>
+            <p style="line-height: 1.7;">@Model.product.ProductDecription</p>
+        </div>
+
+        <!-- Khối bên phải: Chọn số lượng & Tạm tính (Trang 28 bài giảng) -->
+        <div class="col-md-3">
+            <div class="p-3 bg-light rounded border">
+                @using (Html.BeginForm("ProductDetails", "Home", FormMethod.Get))
+                {
+                    <input type="hidden" name="id" value="@Model.product.ProductID" />
+                    <label class="fw-bold mb-2">Số lượng đặt mua:</label>
+                    @Html.TextBoxFor(m => m.quantity, new { @class = "form-control mb-2", @type = "number", @min = 1, onchange = "this.form.submit()" })
+                }
+                <hr />
+                <p class="mb-1 fw-bold">Tạm tính:</p>
+                <h4 class="text-danger fw-bold mb-3">@Model.estimatedValue.ToString("N0") VNĐ</h4>
+
+                <div class="d-grid gap-2">
+                    @Html.ActionLink("🛒 Thêm vào giỏ hàng", "AddToCart", "Cart",
+                        new { id = Model.product.ProductID, quantity = Model.quantity },
+                        new { @class = "btn btn-warning fw-bold" })
+                    <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary">Quay lại mua tiếp</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Khối Nhạc cụ tương tự cùng danh mục -->
+    @if (Model.RelatedProducts != null && Model.RelatedProducts.Any())
+    {
+        <div class="mt-5">
+            <h4 class="fw-bold text-uppercase mb-3" style="color: #8b4513;">🎸 Nhạc cụ tương tự cùng danh mục</h4>
+            <div class="row row-cols-1 row-cols-md-4 g-3">
+                @foreach (var item in Model.RelatedProducts)
+                {
+                    <div class="col">
+                        <div class="card h-100 text-center p-2 shadow-sm">
+                            <a href="@Url.Action("ProductDetails", "Home", new { id = item.ProductID })">
+                                <img src="@item.ProductImage" class="card-img-top" style="height: 150px; object-fit: contain;" />
+                            </a>
+                            <div class="card-body">
+                                <h6 class="fw-bold">@item.ProductName</h6>
+                                <p class="text-danger fw-bold mb-2">@item.ProductPrice.ToString("N0") VNĐ</p>
+                                <a href="@Url.Action("ProductDetails", "Home", new { id = item.ProductID })" class="btn btn-sm btn-outline-primary">Xem ngay</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>

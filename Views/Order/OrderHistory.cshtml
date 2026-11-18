@@ -1,0 +1,85 @@
+﻿@model IEnumerable<_25DH190113_LTW.Models.Order>
+@{
+    ViewBag.Title = "Lịch sử mua hàng - Đơn hàng của tôi";
+    Layout = "~/Views/Shared/_CustomerLayout.cshtml";
+}
+
+<div class="container my-4">
+    <h2 class="fw-bold mb-3">📋 ĐƠN HÀNG CỦA TÔI (LỊCH SỬ MUA HÀNG)</h2>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info text-center p-4">
+            <h5>Bạn chưa có đơn hàng nào tại Tiệm Bá Dương.</h5>
+            <a href="@Url.Action("Index", "Home")" class="btn btn-warning fw-bold mt-2">Khám phá nhạc cụ ngay</a>
+        </div>
+    }
+    else
+    {
+        <div id="orderListContainer">
+            @foreach (var order in Model)
+            {
+                <div class="card shadow-sm mb-4 order-card">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="fw-bold text-primary">Mã đơn hàng: #@order.OrderID</span>
+                            <span class="text-muted ms-3">Ngày đặt: @order.OrderDate.ToString("dd/MM/yyyy")</span>
+                        </div>
+                        <div>
+                            <span class="badge bg-success fs-6">@(order.PaymentStatus ?? "Đang xử lý")</span>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        @if (order.OrderDetails != null && order.OrderDetails.Any())
+                        {
+                            <table class="table table-borderless align-middle mb-0">
+                                <tbody>
+                                    @foreach (var detail in order.OrderDetails)
+                                    {
+                                        <tr class="border-bottom">
+                                            <td style="width: 80px;">
+                                                @if (detail.Product != null)
+                                                {
+                                                    <img src="@detail.Product.ProductImage" alt="@detail.Product.ProductName" style="height: 60px; max-width: 70px; object-fit: contain;" />
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="fw-bold">@(detail.Product != null ? detail.Product.ProductName : "Nhạc cụ #" + detail.ProductID)</div>
+                                                <small class="text-muted">Số lượng: x@(detail.Quantity)</small>
+                                            </td>
+                                            <td class="text-end fw-bold text-danger">
+                                                @((detail.Quantity * detail.UnitPrice).ToString("N0")) VNĐ
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+
+                        <div class="d-flex justify-content-between align-items-center mt-3 pt-2">
+                            <div class="text-muted small">
+                                <div><strong>Giao tới:</strong> @(order.ShippingAddress ?? order.AddressDelivery)</div>
+                                <div><strong>Hình thức:</strong> @(order.ShippingMethod ?? order.DeliveryMethod ?? "Giao tiêu chuẩn") - @(order.PaymentMethod ?? "Tiền mặt")</div>
+                            </div>
+                            <div class="text-end">
+                                <div class="mb-2">
+                                    <span class="text-muted">Tổng tiền: </span>
+                                    <span class="fs-5 fw-bold text-danger">@order.TotalAmount.ToString("N0") VNĐ</span>
+                                </div>
+                                <div>
+                                    @if (order.OrderDetails != null && order.OrderDetails.Any())
+                                    {
+                                        var firstProductId = order.OrderDetails.First().ProductID;
+                                        <a href="@Url.Action("AddToCart", "Cart", new { id = firstProductId, quantity = 1 })" class="btn btn-outline-primary btn-sm me-2">🔄 Mua lại</a>
+                                    }
+                                    <a href="@Url.Action("OrderSuccess", "Order", new { id = order.OrderID })" class="btn btn-warning btn-sm fw-bold">Xem chi tiết đơn</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

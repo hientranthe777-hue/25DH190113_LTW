@@ -1,0 +1,93 @@
+﻿@model _25DH190113_LTW.Models.ViewModel.CheckoutVM
+@{
+    ViewBag.Title = "Đặt hàng";
+}
+
+<script>
+    function enableAddressEdit() {
+        document.getElementById("shippingAddress").removeAttribute("readonly");
+        document.getElementById("newAddressGroup").style.display = "block";
+    }
+    function updateShippingAddress() {
+        var newAddress = document.getElementById("newShippingAddress").value;
+        if (newAddress) {
+            document.getElementById("shippingAddress").value = newAddress;
+        }
+    }
+</script>
+
+<h2 class="fw-bold my-3">📦 THÔNG TIN ĐẶT HÀNG</h2>
+
+@using (Html.BeginForm("Checkout", "Order", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    <div class="row g-4">
+        <div class="col-md-7">
+            <div class="card shadow-sm p-3">
+                <h5 class="fw-bold mb-3">Danh sách nhạc cụ đặt mua</h5>
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Nhạc cụ</th>
+                            <th>Số lượng</th>
+                            <th>Đơn giá</th>
+                            <th>Thành tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.CartItems)
+                        {
+                            <tr>
+                                <td>@item.ProductName</td>
+                                <td>@item.Quantity</td>
+                                <td>@item.UnitPrice.ToString("N0") VNĐ</td>
+                                <td class="text-danger fw-bold">@item.TotalPrice.ToString("N0") VNĐ</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <div class="card shadow-sm p-3">
+                <h5 class="fw-bold mb-3">Thông tin giao nhận</h5>
+
+                <div class="mb-3">
+                    <label class="fw-bold">Địa chỉ giao hàng mặc định:</label>
+                    <div class="input-group">
+                        @Html.TextBoxFor(m => m.ShippingAddress, new { @class = "form-control", @readonly = "readonly", @id = "shippingAddress" })
+                        <button type="button" class="btn btn-outline-primary" onclick="enableAddressEdit()">Chỉnh sửa</button>
+                    </div>
+                    @Html.ValidationMessageFor(m => m.ShippingAddress, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="mb-3" id="newAddressGroup" style="display:none;">
+                    <label class="fw-bold text-primary">Nhập địa chỉ nhận hàng mới:</label>
+                    <input type="text" id="newShippingAddress" class="form-control" placeholder="Số nhà, tên đường, phường/xã, quận/huyện..." />
+                </div>
+
+                <div class="mb-3">
+                    <label class="fw-bold d-block">Phương thức giao hàng:</label>
+                    <label class="me-3">@Html.RadioButtonFor(m => m.ShippingMethod, "Giao hàng nhanh") Giao hàng nhanh</label>
+                    <label>@Html.RadioButtonFor(m => m.ShippingMethod, "Giao hàng tiết kiệm") Giao hàng tiết kiệm</label>
+                </div>
+
+                <div class="mb-3">
+                    <label class="fw-bold d-block">Phương thức thanh toán:</label>
+                    <div>@Html.RadioButtonFor(m => m.PaymentMethod, "Tiền mặt") Thanh toán tiền mặt khi nhận hàng</div>
+                    <div>@Html.RadioButtonFor(m => m.PaymentMethod, "Chuyển khoản") Chuyển khoản ngân hàng / Ví điện tử</div>
+                    <div>@Html.RadioButtonFor(m => m.PaymentMethod, "Mua trước trả sau") Mua trước trả sau</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="fw-bold">Tổng tiền thanh toán:</label>
+                    <h4 class="text-danger fw-bold">@Model.TotalAmount.ToString("N0") VNĐ</h4>
+                    @Html.HiddenFor(m => m.TotalAmount)
+                </div>
+
+                <input type="submit" value="Xác nhận Đặt hàng" class="btn btn-danger btn-lg w-100 fw-bold" onclick="updateShippingAddress()" />
+            </div>
+        </div>
+    </div>
+}
